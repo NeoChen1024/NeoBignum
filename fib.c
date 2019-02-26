@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <bignum.h>
 
-#define	LENGTH	1048576
+#define	LENGTH		(1<<24)
 
 bignum_t *num[3];
 char str[LENGTH];

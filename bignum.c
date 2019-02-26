@@ -171,6 +171,11 @@ void bignum_rawadd(bignum_t *big, bignum_t *small, bignum_t *dst)
 		CARRY(dst, ptr);
 		ptr++;
 	}
+
+	if(dst->digit[ptr] != 0)
+		dst->ndigit = ptr + 1;
+	else
+		dst->ndigit = ptr;
 }
 
 void bignum_rawsub(bignum_t *big, bignum_t *small, bignum_t *dst)
@@ -242,8 +247,6 @@ void bignum_add(bignum_t *a, bignum_t *b, bignum_t *dst)
 				bignum_rawsub(b, a, dst);
 			}
 	}
-
-	dst->ndigit = bignum_len(dst);
 	return;
 }
 
