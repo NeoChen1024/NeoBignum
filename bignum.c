@@ -142,9 +142,9 @@ void bignum_copy(bignum_t *src, bignum_t *dst)
 	return;
 }
 
-unsigned int bignum_len(bignum_t *bignum)
+unsigned int bignum_len(bignum_t *bignum, unsigned int start)
 {
-	unsigned int ptr = bignum->size;
+	unsigned int ptr = start + 1;
 	while(ptr > 0)
 	{
 		if(bignum->digit[--ptr] != 0x00)
@@ -172,10 +172,7 @@ void bignum_rawadd(bignum_t *big, bignum_t *small, bignum_t *dst)
 		ptr++;
 	}
 
-	if(dst->digit[ptr] != 0)
-		dst->ndigit = ptr + 1;
-	else
-		dst->ndigit = ptr;
+	dst->ndigit = bignum_len(dst, big->ndigit + 1);
 }
 
 void bignum_rawsub(bignum_t *big, bignum_t *small, bignum_t *dst)
@@ -196,6 +193,8 @@ void bignum_rawsub(bignum_t *big, bignum_t *small, bignum_t *dst)
 		BORROW(dst, ptr);
 		ptr++;
 	}
+
+	dst->ndigit = bignum_len(dst, big->ndigit);
 }
 
 void bignum_rawdec(bignum_t *dst, bignum_t *dec)
@@ -209,7 +208,7 @@ void bignum_rawdec(bignum_t *dst, bignum_t *dec)
 		ptr++;
 	}
 
-	dst->ndigit = bignum_len(dst);
+	dst->ndigit = bignum_len(dst, dst->ndigit);
 }
 
 void bignum_add(bignum_t *a, bignum_t *b, bignum_t *dst)
@@ -247,7 +246,6 @@ void bignum_add(bignum_t *a, bignum_t *b, bignum_t *dst)
 				bignum_rawsub(b, a, dst);
 			}
 	}
-	return;
 }
 
 void bignum_sub(bignum_t *a, bignum_t *b, bignum_t *dst)
@@ -294,9 +292,6 @@ void bignum_sub(bignum_t *a, bignum_t *b, bignum_t *dst)
 			bignum_rawadd(b, a, dst);
 		}
 	}
-
-	dst->ndigit = bignum_len(dst);
-	return;
 }
 
 void bignum_rawmul(bignum_t *large, bignum_t *small, bignum_t *dst)
@@ -313,7 +308,7 @@ void bignum_rawmul(bignum_t *large, bignum_t *small, bignum_t *dst)
 		}
 	}
 
-	dst->ndigit = bignum_len(dst);
+	dst->ndigit = bignum_len(dst, large->ndigit + small->ndigit);
 	return;
 }
 
@@ -344,7 +339,7 @@ void bignum_lshift(bignum_t *bignum, unsigned int ndigit)
 	for(ptr = 0; ptr < ndigit; ptr++)
 		bignum->digit[ptr] = 0;
 
-	bignum->ndigit = bignum_len(bignum);
+	bignum->ndigit = bignum->ndigit + ndigit;
 	return;
 }
 
@@ -365,21 +360,22 @@ void bignum_rshift(bignum_t *bignum, unsigned int ndigit)
 	for(ptr = size - 1; ptr >= size - ndigit; ptr--)
 		bignum->digit[ptr] = 0;
 
-	bignum->ndigit = bignum_len(bignum);
+	bignum->ndigit = bignum->ndigit - ndigit;
 	return;
 }
 
 unsigned long long int intpow(unsigned long long int x, unsigned long long int y)
 {
-	unsigned long long int count=y - 1, temp=1;
+	unsigned long long int ret=1;
 
-	while(count > 0)
+	while(y != 0)
 	{
-		temp *= x;
-		count++;
+		if((y & 1) == 1)
+			ret *= x;
+		y >>= 1;
+		x *= x; /* Square */
 	}
-
-	return temp;
+	return ret;
 }
 
 /* Division */
@@ -410,7 +406,7 @@ void bignum_rawdiv(bignum_t *src, bignum_t *div, bignum_t *dst)
 		}
 	}
 
-	dst->ndigit = bignum_len(dst);
+	dst->ndigit = bignum_len(dst, src->ndigit - div->ndigit + 1);
 	bignum_destroy(&temp);
 	bignum_destroy(&subtract);
 }
@@ -437,7 +433,7 @@ void bignum_rawmod(bignum_t *src, bignum_t *div, bignum_t *dst)
 			bignum_rawdec(dst, subtract);
 	}
 
-	dst->ndigit = bignum_len(dst);
+	dst->ndigit = bignum_len(dst, div->ndigit);
 	bignum_destroy(&subtract);
 }
 
@@ -505,7 +501,7 @@ void bignum_strtonum(char *str, bignum_t *dst)
 			dst->digit[ptr--] = (int8_t)value;
 		}
 	}
-	dst->ndigit = bignum_len(dst);
+	dst->ndigit = bignum_len(dst, strptr + dst->sign);
 }
 
 void bignum_prints(char *str, size_t size, bignum_t *bignum)
@@ -572,5 +568,5 @@ void bignum_inttonum(bignum_t *dst, long long int integer)
 		ptr++;
 	}
 
-	dst->ndigit = bignum_len(dst);
+	dst->ndigit = bignum_len(dst, ptr);
 }

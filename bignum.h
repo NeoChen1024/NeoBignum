@@ -91,7 +91,7 @@ int8_t bignum_digitcmp(bignum_t *src1, bignum_t *src2);
 int8_t bignum_cmp(bignum_t *src1, bignum_t *src2);
 void bignum_setzero(bignum_t *bignum);
 void bignum_copy(bignum_t *src, bignum_t *dst);
-unsigned int bignum_len(bignum_t *bignum);
+unsigned int bignum_len(bignum_t *bignum, unsigned int start);
 void bignum_rawadd(bignum_t *big, bignum_t *small, bignum_t *dst);
 void bignum_rawsub(bignum_t *big, bignum_t *small, bignum_t *dst);
 void bignum_rawdec(bignum_t *dst, bignum_t *dec);
