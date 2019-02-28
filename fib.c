@@ -4,9 +4,11 @@
 #include <bignum.h>
 
 #define	LENGTH		(1<<24)
+#define LAST		-1
 
 bignum_t *num[3];
 char str[LENGTH];
+int mode = 0;
 
 unsigned long long int max=ULONG_MAX, i=0;
 
@@ -20,27 +22,70 @@ int main(int argc, char **argv)
 	bignum_inttonum(num[2], 0);
 
 	if(argc >= 2)
-		max = strtoull(argv[1], NULL, 10);
+	{
+		if(argv[1][0] == '-')
+		{
+			max = strtoull(argv[1] + 1, NULL, 10);
+			mode = LAST;
+		}
+		else
+			max = strtoull(argv[1], NULL, 10);
+	}
 
 	i=0;
-	while(i <= max)
+	if(mode)
 	{
-		switch(i % 3)
+		while(i <= max)
+		{
+			switch(i % 3)
+			{
+				case 0:
+					bignum_add(num[0], num[1], num[2]);
+					break;
+				case 1:
+					bignum_add(num[1], num[2], num[0]);
+					break;
+				case 2:
+					bignum_add(num[2], num[0], num[1]);
+					break;
+			}
+			i++;
+		}
+		switch((i -= 1) % 3)
 		{
 			case 0:
-				bignum_add(num[0], num[1], num[2]);
 				bignum_prints(str, LENGTH, num[1]);
 				break;
 			case 1:
-				bignum_add(num[1], num[2], num[0]);
 				bignum_prints(str, LENGTH, num[2]);
 				break;
 			case 2:
-				bignum_add(num[2], num[0], num[1]);
 				bignum_prints(str, LENGTH, num[0]);
 				break;
 		}
 		printf("%llu,\t%s\n", i, str);
-		i++;
+	}
+	else
+	{
+		while(i <= max)
+		{
+			switch(i % 3)
+			{
+				case 0:
+					bignum_add(num[0], num[1], num[2]);
+					bignum_prints(str, LENGTH, num[1]);
+					break;
+				case 1:
+					bignum_add(num[1], num[2], num[0]);
+					bignum_prints(str, LENGTH, num[2]);
+					break;
+				case 2:
+					bignum_add(num[2], num[0], num[1]);
+					bignum_prints(str, LENGTH, num[0]);
+					break;
+			}
+			printf("%llu,\t%s\n", i, str);
+			i++;
+		}
 	}
 }
