@@ -12,4 +12,4 @@ fib: $(OBJS) fib.o
 countline:
 	wc -l *.c
 clean:
-	-rm -f ${EXE}
+	-rm -f ${EXE} ${OBJS}

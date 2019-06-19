@@ -7,20 +7,14 @@
 #define LAST		-1
 
 bignum_t *num[3];
-char str[LENGTH];
+char *str;
 int mode = 0;
 
 unsigned long long int max=ULONG_MAX, i=0;
+unsigned long long int len=LENGTH;
 
 int main(int argc, char **argv)
 {
-	for(i=0; i < 3; i++)
-		num[i] = bignum_init(LENGTH);
-
-	bignum_inttonum(num[0], 1);
-	bignum_inttonum(num[1], 0);
-	bignum_inttonum(num[2], 0);
-
 	if(argc >= 2)
 	{
 		if(argv[1][0] == '-')
@@ -31,6 +25,19 @@ int main(int argc, char **argv)
 		else
 			max = strtoull(argv[1], NULL, 10);
 	}
+	if(argc >= 3)
+	{
+		len = 1;
+		len <<= strtoull(argv[2], NULL, 10);
+	}
+
+	for(i=0; i < 3; i++)
+		num[i] = bignum_init(len);
+	str = malloc(len);
+
+	bignum_inttonum(num[0], 1);
+	bignum_inttonum(num[1], 0);
+	bignum_inttonum(num[2], 0);
 
 	i=0;
 	if(mode)
