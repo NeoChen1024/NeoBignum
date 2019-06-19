@@ -11,7 +11,7 @@ char *str;
 int mode = 0;
 
 unsigned long long int max=ULONG_MAX, i=0;
-unsigned long long int len=LENGTH;
+unsigned int len=LENGTH;
 
 int main(int argc, char **argv)
 {
